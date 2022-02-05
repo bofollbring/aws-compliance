@@ -36,6 +36,7 @@ AWS_COMPLIANCE_VERSION=0.1
 ### Running Variables
 CURRENT_SCRIPT=`basename $0`
 CURRENT_DIRECTORY=`pwd`
+SCRIPT_DIRECTORY=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 ### Colour Variables
 BLACK="\e[30m"
@@ -194,10 +195,10 @@ function main {
     clear
 
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#          Entering: main function            #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                          Entering: main function                            #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     ### Initial Setup
@@ -226,10 +227,10 @@ function main {
 function initial_setup {
 
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#      Entering: initial_setup function       #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                       Entering: initial_setup function                       #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     ### Install the prerequisites
@@ -255,10 +256,10 @@ function initial_setup {
 function install_prerequisites {
 
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#  Entering: install_prerequisites function   #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                  Entering: install_prerequisites function                    #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     ### Iterate prerequisite packages and install them
@@ -303,10 +304,10 @@ function install_prerequisites {
 #----------------------------------------------------------------------
 function install_aws_cli {
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#     Entering: install_aws_cli function      #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                     Entering: install_aws_cli function                       #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     if ! command -v aws &> /dev/null
@@ -336,6 +337,7 @@ function install_aws_cli {
 
         ### Turn on cursor
         tput cnorm
+
         echo ""
         if ! command -v aws &> /dev/null
         then
@@ -348,7 +350,7 @@ function install_aws_cli {
         ### Run initial configuration
         run_command "aws configure" ${LINENO}
 
-        sleep 2
+        sleep 1
     else
         if [[ "$DEBUG" == "true" ]]; then
             echo "DEBUG!!!"
@@ -367,10 +369,10 @@ function install_aws_cli {
 #----------------------------------------------------------------------
 function set_aws_profile {
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#     Entering: set_aws_profile function      #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                     Entering: set_aws_profile function                       #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     AWS_CONFIGURE_LIST=`aws configure list`
@@ -445,10 +447,10 @@ function set_aws_profile {
 #----------------------------------------------------------------------
 function set_aws_region {
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#     Entering: set_aws_region function       #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                     Entering: set_aws_region function                        #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     REGION=`aws configure get region`
@@ -512,10 +514,10 @@ function set_aws_region {
 #----------------------------------------------------------------------
 function select_aws_profile {
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#    Entering: select_aws_profile function    #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                    Entering: select_aws_profile function                     #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     clear
@@ -552,10 +554,10 @@ function select_aws_profile {
 #----------------------------------------------------------------------
 function select_aws_region {
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#    Entering: select_aws_region function     #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                    Entering: select_aws_region function                      #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     clear
@@ -583,10 +585,10 @@ function select_aws_region {
 #----------------------------------------------------------------------
 function prefill_aws_resources {
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#  Entering: prefill_aws_resources function   #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                  Entering: prefill_aws_resources function                    #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     clear
@@ -805,6 +807,27 @@ function prefill_aws_resources {
 
     echo ""
 
+    ###################################################
+    #                       IAM                       #
+    ###################################################
+    
+    ### Start the loading animation in background and grab the pid
+    start_daemon "        Fetching IAM Resouces. Please wait"
+
+    JSON_IAM_LIST_ROLES=`aws iam list-roles${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+    IAM_ROLE_NAMES=(`jq -r '.Roles[].RoleName' <<<"$JSON_IAM_LIST_ROLES"`)
+    
+    if [ "$IAM_ROLE_NAMES" == "" ]; then
+        IAM="${RED}Not in use${RESET_FORMATTING}"
+    else
+        IAM="${GREEN}In use    ${RESET_FORMATTING}"
+    fi
+
+    ### End the loading animation
+    end_daemon "        Fetching IAM Resouces. Done          "
+
+    echo ""
+
     ### Turn on cursor
     tput cnorm
 }
@@ -817,10 +840,10 @@ function prefill_aws_resources {
 #----------------------------------------------------------------------
 function get_account_info {
     if [[ "$DEBUG" == "true" ]]; then
-        echo "###############################################"
-        echo "#    Entering: get_account_info function      #"
-        echo "###############################################"
-        sleep 2
+        echo "################################################################################"
+        echo "#                   Entering: get_account_info function                        #"
+        echo "################################################################################"
+        sleep 1
     fi
 
     if [ -n "$DEBUG" ]; then
@@ -850,7 +873,7 @@ function get_account_info {
     end_daemon "        Fetching STS Resouces. Done          "
 
     ### Sleep to show last message
-    sleep 2
+    sleep 1
 
     ### Turn on cursor
     tput cnorm
@@ -866,6 +889,13 @@ function get_account_info {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudformation_enable_disable_termination_protection {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#   Entering: cloudformation_enable_disable_termination_protection function    #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDFORMATION_STACK_NAME=$1
     TERMINATION_PROTECTION_ENABLED=$2
 
@@ -901,7 +931,7 @@ function cloudformation_enable_disable_termination_protection {
     tput cnorm
 
     ### Allow message to be seen
-    sleep 2
+    sleep 1
 }
 
 #----------------------------------------------------------------------
@@ -911,6 +941,13 @@ function cloudformation_enable_disable_termination_protection {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudformation_sync_drift {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                Entering: cloudformation_sync_drift function                  #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDFORMATION_STACK_NAME=$1
 
     clear
@@ -940,7 +977,7 @@ function cloudformation_sync_drift {
     tput cnorm
 
     ### Allow message to be seen
-    sleep 2
+    sleep 1
 }
 
 ###################################################
@@ -953,6 +990,13 @@ function cloudformation_sync_drift {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudtrail_enable_disable_global_service_events {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#      Entering: cloudtrail_enable_disable_global_service_events function      #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDTRAIL_TRAIL_NAME=$1
     INCLUDE_GLOBAL_SERVICE_EVENTS=$2
 
@@ -988,7 +1032,7 @@ function cloudtrail_enable_disable_global_service_events {
     tput cnorm
 
     ### Allow message to be seen
-    sleep 2
+    sleep 1
 }
 
 #----------------------------------------------------------------------
@@ -998,6 +1042,13 @@ function cloudtrail_enable_disable_global_service_events {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudtrail_enable_disable_multi_region_trail {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#        Entering: cloudtrail_enable_disable_multi_region_trail function       #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDTRAIL_TRAIL_NAME=$1
     IS_MULTI_REGION_TRAIL$2
 
@@ -1033,7 +1084,7 @@ function cloudtrail_enable_disable_multi_region_trail {
     tput cnorm
 
     ### Allow message to be seen
-    sleep 2
+    sleep 1
 }
 
 #----------------------------------------------------------------------
@@ -1044,6 +1095,13 @@ function cloudtrail_enable_disable_multi_region_trail {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudtrail_enable_disable_log_file_validation_enabled {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#   Entering: cloudtrail_enable_disable_log_file_validation_enabled function   #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDTRAIL_TRAIL_NAME=$1
     LOG_FILE_VALIDATION_ENABLED=$2
 
@@ -1079,7 +1137,7 @@ function cloudtrail_enable_disable_log_file_validation_enabled {
     tput cnorm
 
     ### Allow message to be seen
-    sleep 2
+    sleep 1
 }
 
 ###################################################
@@ -1092,6 +1150,13 @@ function cloudtrail_enable_disable_log_file_validation_enabled {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                    Entering: cloudwatch_alarm function                       #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME="$1"; shift
     CLOUDWATCH_ALARM_TOPIC_NAME="$1"; shift
     CLOUDWATCH_FILTER_PATTERN="$1"; shift
@@ -1167,7 +1232,7 @@ function cloudwatch_alarm {
     tput cnorm
 
     ### Allow message to be seen
-    sleep 2
+    sleep 1
 
 }
 
@@ -1178,6 +1243,13 @@ function cloudwatch_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_vpc_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#               Entering: cloudwatch_vpc_changes_alarm function                #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="vpc-changes-alarm-action"
@@ -1203,6 +1275,13 @@ function cloudwatch_vpc_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_security_group_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#          Entering: cloudwatch_security_group_changes_alarm function          #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="security-group-changes-alarm-action"
@@ -1228,6 +1307,13 @@ function cloudwatch_security_group_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_s3_bucket_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#            Entering: cloudwatch_s3_bucket_changes_alarm function             #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="s3-bucket-changes-alarm-action"
@@ -1253,6 +1339,13 @@ function cloudwatch_s3_bucket_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_route_table_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: cloudwatch_route_table_changes_alarm function            #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="route-table-changes-alarm-action"
@@ -1278,6 +1371,13 @@ function cloudwatch_route_table_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_root_usage_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                Entering: cloudwatch_root_usage_alarm function                #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="root-usage-alarm-action"
@@ -1303,6 +1403,13 @@ function cloudwatch_root_usage_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_network_acl_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#            Entering: cloudwatch_network_acl_changes_alarm function            #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="network-acl-changes-alarm-action"
@@ -1328,6 +1435,13 @@ function cloudwatch_network_acl_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_internet_gateway_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#         Entering: cloudwatch_internet_gateway_changes_alarm function         #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="internet-gateway-changes-alarm-action"
@@ -1353,6 +1467,13 @@ function cloudwatch_internet_gateway_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_ec2_instance_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: cloudwatch_ec2_instance_changes_alarm function           #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="ec2-instance-changes-alarm-action"
@@ -1378,6 +1499,13 @@ function cloudwatch_ec2_instance_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_ec2_large_instance_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#        Entering: cloudwatch_ec2_large_instance_changes_alarm function        #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="ec2-large-instance-changes-alarm-action"
@@ -1403,6 +1531,13 @@ function cloudwatch_ec2_large_instance_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_failed_console_logins_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: cloudwatch_failed_console_logins_alarm function          #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="failed-console-logins-alarm-action"
@@ -1428,6 +1563,13 @@ function cloudwatch_failed_console_logins_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_no_mfa_console_logins_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: cloudwatch_no_mfa_console_logins_alarm function          #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="no-mfa-console-logins-alarm-action"
@@ -1453,6 +1595,13 @@ function cloudwatch_no_mfa_console_logins_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_disabled_deleted_cmks_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: cloudwatch_disabled_deleted_cmks_alarm function          #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="disabled-deleted-cmks-alarm-action"
@@ -1478,6 +1627,13 @@ function cloudwatch_disabled_deleted_cmks_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_cloudtrail_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#            Entering: cloudwatch_cloudtrail_changes_alarm function            #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="cloudtrail-changes-alarm-action"
@@ -1503,6 +1659,13 @@ function cloudwatch_cloudtrail_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_config_changes_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#              Entering: cloudwatch_config_changes_alarm function              #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="config-changes-alarm-action"
@@ -1528,6 +1691,13 @@ function cloudwatch_config_changes_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_unauthorized_api_calls_alarm {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#          Entering: cloudwatch_unauthorized_api_calls_alarm function          #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     CLOUDWATCH_ALARM_NAME=$1
 
     CLOUDWATCH_ALARM_TOPIC_NAME="unauthorized-api-calls-alarm-action"
@@ -1556,6 +1726,13 @@ function cloudwatch_unauthorized_api_calls_alarm {
 # Returns:  null 
 #----------------------------------------------------------------------
 function elb_enable_disable_access_log_enabled {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: elb_enable_disable_access_log_enabled function           #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     ELB_LOAD_BALANCER_NAME=$1
     ACCESS_LOG_ENABLED=$2
     ELB_LOAD_BALANCER_NAME_LOW=`to_lower $ELB_LOAD_BALANCER_NAME`
@@ -1621,8 +1798,286 @@ function elb_enable_disable_access_log_enabled {
         tput cnorm
 
         ### Allow message to be seen
-        sleep 2
+        sleep 1
     fi
+}
+
+###################################################
+#                     APIGATEWAY                  #
+###################################################
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_certificate_update
+# Purpose:  Used to update the cluster certificate 
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_certificate_update {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: apigateway_cluster_certificate_update function           #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+    APIGATEWAY_STAGE_NAME=$3
+
+    clear
+    print_menu_header "API Gateway Cluster Stages Certificate - ${APIGATEWAY_REST_API_NAME}"
+
+    ### Fetch the JSON object for stage
+    CLIENT_CERTIFICATE_ID=`jq -r ".item[] | select (.stageName == \"${APIGATEWAY_STAGE_NAME}\") | .clientCertificateId" <<<"${JSON_APIGATEWAY_GET_STAGES}"`
+
+    ### Turn off cursor
+    tput civis
+
+    ### Check if certificate already exist
+    if [ "$CLIENT_CERTIFICATE_ID" == "null" ]; then
+        echo ""
+        
+        ### Start the loading animation in background and grab the pid
+        start_daemon "        Updating API Gateway Cluster Stage Certificate - ${APIGATEWAY_STAGE_NAME}. Please wait"
+        
+        ### Create new certificate
+        JSON_CLIENT_CERTIFICATE=`aws apigateway generate-client-certificate --description "SSL Certificate for HTTP requests authentication for ${APIGATEWAY_REST_API_NAME} - stage ${APIGATEWAY_STAGE_NAME}."`
+
+        ### Get the Certificate ID
+        CLIENT_CERTIFICATE_ID=`jq -r '.clientCertificateId' <<<"$JSON_CLIENT_CERTIFICATE"`
+
+        ### Check and make sure we got a certificate id back
+        if [[ "$CLIENT_CERTIFICATE_ID" != "" ]]; then
+
+            ### Run command(s) to update apigateway stage certificate
+            run_command "aws apigateway update-stage --rest-api-id ${APIGATEWAY_REST_API_ID} --stage-name ${APIGATEWAY_STAGE_NAME} --patch-operations op=replace,path=/clientCertificateId,value=${CLIENT_CERTIFICATE_ID} ${AWS_PROFILE_ARG} --region ${AWS_REGION}${SUFFIX}" ${LINENO}
+
+            ### Fetch the updated stages JSON object for apigateway
+            JSON_APIGATEWAY_GET_STAGES=`aws apigateway get-stages --rest-api-id ${APIGATEWAY_REST_API_ID}${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+
+        fi
+        
+        ### End the loading animation
+        end_daemon "        Updating API Gateway Cluster Stage Certificate - ${APIGATEWAY_STAGE_NAME}. Done          "
+
+    else
+
+        ### Certificate exist echo public key
+        echo ""
+        
+        ### Start the loading animation in background and grab the pid
+        start_daemon "        Fetching API Gateway Cluster Stage Certificate - ${APIGATEWAY_STAGE_NAME}. Please wait"
+
+        ### Fetch apigateway stage public key
+        PUBLIC_KEY=`aws apigateway get-client-certificate --client-certificate-id ${CLIENT_CERTIFICATE_ID} --query "pemEncodedCertificate"${AWS_PROFILE_ARG} --region ${AWS_REGION}${SUFFIX}`
+
+        ### End the loading animation
+        end_daemon "        Fetching API Gateway Cluster Stage Certificate - ${APIGATEWAY_STAGE_NAME}. Done          "
+
+        echo ""
+
+        echo ""
+
+        echo "${PUBLIC_KEY}"
+
+        echo ""
+
+        echo "Hit Enter to continue" ; read ANS
+
+    fi
+    
+    ### Turn on cursor
+    tput cnorm
+
+    ### Allow message to be seen
+    sleep 1
+}
+
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_cloudwatch_update
+# Purpose:  Used to update the cluster cloudwatch 
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_cloudwatch_update {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: apigateway_cluster_cloudwatch_update function            #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+    APIGATEWAY_STAGE_NAME=$3
+
+    APIGATEWAY_IAM_ROLE_TRUST_POLICY="${SCRIPT_DIRECTORY}/templates/apigateway-iam-role-trust-policy-template.json"
+    ROLE_NAME="apigateway-cloudwatch-role"
+
+    clear
+    print_menu_header "API Gateway Cluster Stages CloudWatchLogs - ${APIGATEWAY_REST_API_NAME}"
+
+    echo ""
+
+    ### Turn off cursor
+    tput civis
+    
+    ### Start the loading animation in background and grab the pid
+    start_daemon "        Updating API Gateway Cluster Stage CloudWatchLogs - ${APIGATEWAY_STAGE_NAME}. Please wait"
+
+    ### Fetch the JSON object for stage
+    LOGGING_LEVEL=`jq -r ".item[] | select (.stageName == \"${APIGATEWAY_STAGE_NAME}\") | .methodSettings | .[] | .loggingLevel" <<<"$JSON_APIGATEWAY_STAGE"`
+
+    ### Check and make sure we got a certificate id back
+    if [[ "$LOGGING_LEVEL" != "INFO" ]]; then
+
+        ### Check if role exists
+        APIGATEWAY_IAM_ROLE_NAME=`jq -r ".Roles[] | select (.RoleName == \"${ROLE_NAME}\") | .RoleName" <<<"$JSON_IAM_LIST_ROLES"`
+
+        ### Check and make sure we got a role name back
+        if [[ "$APIGATEWAY_IAM_ROLE_NAME" == "" ]]; then
+
+            ### Create new role
+            JSON_APIGATEWAY_IAM_ROLE=`aws iam create-role --role-name apigateway-cloudwatch-role --assume-role-policy-document file://${APIGATEWAY_IAM_ROLE_TRUST_POLICY}${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+
+        else
+
+            ### Get the role JSON object
+            JSON_APIGATEWAY_IAM_ROLE=`jq -r ".Roles[] | select (.RoleName == \"${ROLE_NAME}\")" <<<"$JSON_IAM_LIST_ROLES"`
+
+        fi
+
+        ### Get role arn
+        APIGATEWAY_IAM_ROLE_ARN=`jq -r '.Arn' <<<"$JSON_APIGATEWAY_IAM_ROLE"`
+
+        ### Run command to attach AmazonAPIGatewayPushToCloudWatchLogs to role
+        run_command "aws iam attach-role-policy --role-name ${ROLE_NAME} --policy-arn arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs${AWS_PROFILE_ARG} --region ${AWS_REGION}${SUFFIX}" ${LINENO}
+
+        ### Run command to attach role to apigateway
+        run_command "aws apigateway update-account --patch-operations op='replace',path='/cloudwatchRoleArn',value='${APIGATEWAY_IAM_ROLE_ARN}'${AWS_PROFILE_ARG} --region ${AWS_REGION}${SUFFIX}" ${LINENO}
+
+        ### Run command to update loglevel
+        run_command "aws apigateway update-stage --rest-api-id ${APIGATEWAY_REST_API_ID} --stage-name ${APIGATEWAY_STAGE_NAME} --patch-operations op=replace,path=/*/*/logging/loglevel,value=INFO op=replace,path=/*/*/logging/dataTrace,value=true${AWS_PROFILE_ARG} --region ${AWS_REGION}${SUFFIX}" ${LINENO}
+
+        ### Fetch the stages JSON object for apigateway
+        JSON_APIGATEWAY_GET_STAGES=`aws apigateway get-stages --rest-api-id ${APIGATEWAY_REST_API_ID}${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+
+        ### Fetch the api JSON object dor apigateway
+        JSON_APIGATEWAY_GET_REST_API=`aws apigateway get-rest-api --rest-api-id ${APIGATEWAY_REST_API_ID}${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+
+    fi
+    
+    ### End the loading animation
+    end_daemon "        Updating API Gateway Cluster Stage CloudWatchLogs - ${APIGATEWAY_STAGE_NAME}. Done          "
+
+    ### Turn on cursor
+    tput cnorm
+
+    ### Allow message to be seen
+    sleep 1
+}
+
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_detailed_cloudwatch_logs_update
+# Purpose:  Used to update the cluster detailed cloudwatch metrics
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_detailed_cloudwatch_logs_update {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#    Entering: apigateway_cluster_detailed_cloudwatch_logs_update function     #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+    APIGATEWAY_STAGE_NAME=$3
+
+    clear
+    print_menu_header "API Gateway Cluster Stages CloudWatchLogs Metrics - ${APIGATEWAY_REST_API_NAME}"
+
+    echo ""
+
+    ### Turn off cursor
+    tput civis
+    
+    ### Start the loading animation in background and grab the pid
+    start_daemon "        Updating API Gateway Cluster Stage Detailed CloudWatchLogs Metrics - ${APIGATEWAY_STAGE_NAME}. Please wait"
+    
+    ### Create new certificate
+    JSON_APIGATEWAY_STAGE=`aws apigateway update-stage --rest-api-id ${APIGATEWAY_REST_API_ID} --stage-name ${APIGATEWAY_STAGE_NAME} --patch-operations op=replace,path=/*/*/metrics/enabled,value=true${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+
+    ### End the loading animation
+    end_daemon "        Updating API Gateway Cluster Stage Detailed CloudWatchLogs Metrics - ${APIGATEWAY_STAGE_NAME}. Done          "
+
+    ### Turn on cursor
+    tput cnorm
+
+    ### Allow message to be seen
+    sleep 1
+}
+
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_content_encoding_update
+# Purpose:  Used to update the cluster content encoding
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_content_encoding_update {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#        Entering: apigateway_cluster_content_encoding_update function         #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+    APIGATEWAY_STAGE_NAME=$3
+
+    clear
+    print_menu_header "API Gateway Cluster Stages Content Encoding - ${APIGATEWAY_REST_API_NAME}"
+
+    echo ""
+
+    ### Turn off cursor
+    tput civis
+    
+    ### Start the loading animation in background and grab the pid
+    start_daemon "        Updating API Gateway Cluster Stage Content Encoding - ${APIGATEWAY_STAGE_NAME}. Please wait"
+    
+    ### Create new certificate
+    JSON_APIGATEWAY_STAGE=`aws apigateway update-stage --rest-api-id ${APIGATEWAY_REST_API_ID} --stage-name ${APIGATEWAY_STAGE_NAME} --patch-operations op=replace,path=/minimumCompressionSize,value=5000${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+
+    ### End the loading animation
+    end_daemon "        Updating API Gateway Cluster Stage Content Encoding - ${APIGATEWAY_STAGE_NAME}. Done          "
+
+    ### Turn on cursor
+    tput cnorm
+
+    ### Allow message to be seen
+    sleep 1
+}
+
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_private_endpoint_update
+# Purpose:  Used to update the cluster private endpoint
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_private_endpoint_update {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#        Entering: apigateway_cluster_private_endpoint_update function         #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+    APIGATEWAY_STAGE_NAME=$3
+
 }
 
 ######################################################################
@@ -1641,6 +2096,12 @@ function elb_enable_disable_access_log_enabled {
 # Returns:  null 
 #----------------------------------------------------------------------
 function main_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                        Entering: main_menu function                          #"
+        echo "################################################################################"
+        sleep 1
+    fi
 
     while true ; do
         clear
@@ -1737,6 +2198,12 @@ function main_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function select_profile_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                   Entering: select_profile_menu function                     #"
+        echo "################################################################################"
+        sleep 1
+    fi
 
     while true ; do
         clear
@@ -1786,6 +2253,12 @@ function select_profile_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function select_aws_region_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                 Entering: select_aws_region_menu function                    #"
+        echo "################################################################################"
+        sleep 1
+    fi
 
     while true ; do
         clear
@@ -1860,6 +2333,13 @@ function select_aws_region_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudformation_stacks_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#               Entering: cloudformation_stacks_menu function                  #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -1880,7 +2360,7 @@ function cloudformation_stacks_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#CLOUDFORMATION_STACK_NAMES[@]} ]; then continue; else cloudformation_stack_menu ${CLOUDFORMATION_STACK_NAMES[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#CLOUDFORMATION_STACK_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else cloudformation_stack_menu ${CLOUDFORMATION_STACK_NAMES[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -1901,6 +2381,12 @@ function cloudformation_stacks_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudformation_stack_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#               Entering: cloudformation_stack_menu function                   #"
+        echo "################################################################################"
+        sleep 1
+    fi
 
     CLOUDFORMATION_STACK_NAME=$1
 
@@ -1989,6 +2475,13 @@ function cloudformation_stack_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudtrail_trails_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                 Entering: cloudtrail_trails_menu function                    #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2009,7 +2502,7 @@ function cloudtrail_trails_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#CLOUDTRAIL_TRAIL_NAMES[@]} ]; then continue; else cloudtrail_trail_menu ${CLOUDTRAIL_TRAIL_NAMES[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#CLOUDTRAIL_TRAIL_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else cloudtrail_trail_menu ${CLOUDTRAIL_TRAIL_NAMES[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2030,6 +2523,12 @@ function cloudtrail_trails_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudtrail_trail_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                 Entering: cloudtrail_trail_menu function                     #"
+        echo "################################################################################"
+        sleep 1
+    fi
     
     CLOUDTRAIL_TRAIL_NAME=$1
 
@@ -2108,6 +2607,13 @@ function cloudtrail_trail_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudwatch_alarms_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                 Entering: cloudwatch_alarms_menu function                    #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2301,6 +2807,13 @@ function cloudwatch_alarms_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function elb_load_balancers_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                Entering: elb_load_balancers_menu function                    #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2321,7 +2834,7 @@ function elb_load_balancers_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#ELB_LOAD_BALANCER_NAMES[@]} ]; then continue; else elb_load_balancer_menu ${ELB_LOAD_BALANCER_NAMES[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#ELB_LOAD_BALANCER_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else elb_load_balancer_menu ${ELB_LOAD_BALANCER_NAMES[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2342,6 +2855,12 @@ function elb_load_balancers_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function elb_load_balancer_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                Entering: elb_load_balancer_menu function                     #"
+        echo "################################################################################"
+        sleep 1
+    fi
     
     ELB_LOAD_BALANCER_NAME=$1
 
@@ -2418,6 +2937,13 @@ function elb_load_balancer_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function elbv2_load_balancers_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#               Entering: elbv2_load_balancers_menu function                   #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2438,7 +2964,7 @@ function elbv2_load_balancers_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#ELBV2_LOAD_BALANCER_NAMES[@]} ]; then continue; else elbv2_load_balancer_menu ${ELBV2_LOAD_BALANCER_NAMES[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#ELBV2_LOAD_BALANCER_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else elbv2_load_balancer_menu ${ELBV2_LOAD_BALANCER_NAMES[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2459,6 +2985,12 @@ function elbv2_load_balancers_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function elbv2_load_balancer_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                Entering: elbv2_load_balancer_menu function                   #"
+        echo "################################################################################"
+        sleep 1
+    fi
     
     ELBV2_LOAD_BALANCER_NAME=$1
 
@@ -2547,6 +3079,13 @@ function elbv2_load_balancer_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function apigateway_clusters_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                Entering: apigateway_clusters_menu function                   #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2567,7 +3106,7 @@ function apigateway_clusters_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#APIGATEWAY_REST_API_NAMES[@]} ]; then continue; else apigateway_cluster_menu ${APIGATEWAY_REST_API_NAMES[$OPTION-1]} ${APIGATEWAY_REST_API_IDS[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#APIGATEWAY_REST_API_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else apigateway_cluster_menu ${APIGATEWAY_REST_API_NAMES[$OPTION-1]} ${APIGATEWAY_REST_API_IDS[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2588,20 +3127,61 @@ function apigateway_clusters_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function apigateway_cluster_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                 Entering: apigateway_cluster_menu function                   #"
+        echo "################################################################################"
+        sleep 1
+    fi
 
     APIGATEWAY_REST_API_NAME=$1
     APIGATEWAY_REST_API_ID=$2
+
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "APIGATEWAY_REST_API_NAME: ${APIGATEWAY_REST_API_NAME}"
+        echo "APIGATEWAY_REST_API_ID: ${APIGATEWAY_REST_API_ID}"
+        echo ""
+        echo "aws apigateway get-stages --rest-api-id ${APIGATEWAY_REST_API_ID}${AWS_PROFILE_ARG} --region ${AWS_REGION}"
+        sleep 1
+    fi
 
     while true ; do
         MENU_ITEM=1
 
         clear
         print_menu_header "API Gateway Cluster - ${APIGATEWAY_REST_API_NAME}"
+
+        ### Turn off cursor
+        tput civis
+            
+        ### Start the loading animation in background and grab the pid
+        start_daemon "        Fetching configuration for API Gateway Cluster - ${APIGATEWAY_REST_API_NAME}. Please wait"
+    
+        ### Fetch the stages JSON object for apigateway
+        JSON_APIGATEWAY_GET_STAGES=`aws apigateway get-stages --rest-api-id ${APIGATEWAY_REST_API_ID}${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+
+        ### Fetch the api JSON object dor apigateway
+        JSON_APIGATEWAY_GET_REST_API=`aws apigateway get-rest-api --rest-api-id ${APIGATEWAY_REST_API_ID}${AWS_PROFILE_ARG} --region ${AWS_REGION}`
+
+        ### End the loading animation
+        end_daemon "        Fetching configuration for API Gateway Cluster - ${APIGATEWAY_REST_API_NAME}. Done          "
+
+        ### Turn on cursor
+        tput cnorm
         
+        clear
+        print_menu_header "API Gateway Cluster - ${APIGATEWAY_REST_API_NAME}"
+
         echo "
             1. Stages Certificates
 
-          
+            2. CloudWatchLogs
+
+            3. Detailed CloudWatchLogs Metrics
+
+            4. Content Encoding
+
+            5. Private Endpoint
           
 
 
@@ -2617,7 +3197,15 @@ function apigateway_cluster_menu {
 
     		''|[Bb]|[Bb]ack) break ;;
 
-    		1)  clr ; apigateway_cluster_certificate_menu ${APIGATEWAY_REST_API_NAMES[$OPTION-1]} ${APIGATEWAY_REST_API_IDS[$OPTION-1]} ;;
+    		1)  clr ; apigateway_cluster_certificate_menu ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ;;
+
+            2)  clr ; apigateway_cluster_cloudwatchlogs_menu ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ;;
+
+            3)  clr ; apigateway_cluster_detailed_cloudwatchlogs_metrics_menu ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ;;
+
+            4)  clr ; apigateway_cluster_content_encoding_menu ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ;;
+
+            5)  clr ; apigateway_cluster_private_endpoint_menu ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ;;
 
             [EeQq]|[Ee]xit|[Qq]uit) echo "\n" ; exit ;;
 
@@ -2636,55 +3224,50 @@ function apigateway_cluster_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function apigateway_cluster_certificate_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#           Entering: apigateway_cluster_certificate_menu function             #"
+        echo "################################################################################"
+        sleep 1
+    fi
 
     APIGATEWAY_REST_API_NAME=$1
     APIGATEWAY_REST_API_ID=$2
 
     if [[ "$DEBUG" == "true" ]]; then
+        echo "DEBUG!!!"
         echo "APIGATEWAY_REST_API_NAME: ${APIGATEWAY_REST_API_NAME}"
         echo "APIGATEWAY_REST_API_ID: ${APIGATEWAY_REST_API_ID}"
         echo ""
-        echo "aws apigateway get-stages --rest-api-id ${APIGATEWAY_REST_API_ID}${AWS_PROFILE_ARG} --region ${AWS_REGION}"
-        sleep 2
+        sleep 1
     fi
 
     while true ; do
         MENU_ITEM=1
 
         clear
-        print_menu_header "API Gateway Cluster Stages Certificate- ${APIGATEWAY_REST_API_NAME}"
+        print_menu_header "API Gateway Cluster Stages Certificate - ${APIGATEWAY_REST_API_NAME}"
         
         echo ""
-
-        ### Turn off cursor
-        tput civis
-            
-        ### Start the loading animation in background and grab the pid
-        start_daemon "        Fetching configuration for API Gateway Cluster - ${APIGATEWAY_REST_API_NAME}. Please wait"
-    
-        ### Fetch the JSON object for apigateway
-        JSON_APIGATEWAY_GET_STAGES=`aws apigateway get-stages --rest-api-id ${APIGATEWAY_REST_API_ID}${AWS_PROFILE_ARG} --region ${AWS_REGION}`
-
-        ### End the loading animation
-        end_daemon "        Fetching configuration for ELBv2 Load Balancer - ${ELBV2_LOAD_BALANCER_NAME}. Done          "
-
-        ### Turn on curs
         
-        clear
-        print_menu_header "API Gateway Cluster - ${APIGATEWAY_REST_API_NAME}"
-
         JSON_APIGATEWAY_STAGE_NAMES=`jq -r ".item[] | .stageName" <<<"$JSON_APIGATEWAY_GET_STAGES"`
 
         ### Get the certificate for each stage
-        for JSON_APIGATEWAY_STAGE_NAME in ${JSON_APIGATEWAY_STAGE_NAMES[@]}; do
+        for APIGATEWAY_STAGE_NAME in ${JSON_APIGATEWAY_STAGE_NAMES[@]}; do
             
             ### Fetch the JSON object for stage
-            CLIENT_CERTIFICATE_ID=`jq -r ".item[] | select (.stageName == \"${JSON_APIGATEWAY_GET_STAGE_NAME}\") | .clientCertificateId" <<<"${JSON_APIGATEWAY_GET_STAGES}"`
+            CLIENT_CERTIFICATE_ID=`jq -r ".item[] | select (.stageName == \"${APIGATEWAY_STAGE_NAME}\") | .clientCertificateId" <<<"${JSON_APIGATEWAY_GET_STAGES}"`
 
-            if [ "$CLIENT_CERTIFICATE_ID" == "" ]; then
-                print_compliance_line ${MENU_ITEM} ${JSON_APIGATEWAY_STAGE_NAME} CLIENT_CERTIFICATE_ID fail
+            if [[ "$DEBUG" == "true" ]]; then
+                echo "DEBUG!!!"
+                echo "CLIENT_CERTIFICATE_ID: ${CLIENT_CERTIFICATE_ID}"
+                echo "jq -r \".item[] | select (.stageName == \"${APIGATEWAY_STAGE_NAME}\") | .clientCertificateId\""
+            fi
+
+            if [ "$CLIENT_CERTIFICATE_ID" == "null" ]; then
+                print_compliance_line ${MENU_ITEM} ${APIGATEWAY_STAGE_NAME} CLIENT_CERTIFICATE_ID fail
             else
-                print_compliance_line ${MENU_ITEM} ${JSON_APIGATEWAY_STAGE_NAME} CLIENT_CERTIFICATE_ID pass
+                print_compliance_line ${MENU_ITEM} ${APIGATEWAY_STAGE_NAME} CLIENT_CERTIFICATE_ID pass
             fi
             MENU_ITEM=`expr $MENU_ITEM + 1`
         done
@@ -2695,6 +3278,305 @@ function apigateway_cluster_certificate_menu {
         read OPTION
 
         case $OPTION in
+
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#JSON_APIGATEWAY_STAGE_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else apigateway_cluster_certificate_update ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ${JSON_APIGATEWAY_STAGE_NAMES[$OPTION-1]}; fi ;;
+            
+            ''|[Bb]|[Bb]ack) break ;;
+	
+            [Mm]|[Mm]ain) clr ; main_menu ;;
+
+            [EeQq]|[Ee]xit) echo "\n" ; exit ;;
+
+            *)  clr ; wr_err "Invalid option! ==> $OPTION" ;;
+
+        esac
+    done
+}
+
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_cloudwatchlogs_menu
+# Purpose:  Used to display the api gateway cluster cloudwatchlogs 
+#           menu.
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_cloudwatchlogs_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#          Entering: apigateway_cluster_cloudwatchlogs_menu function           #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "APIGATEWAY_REST_API_NAME: ${APIGATEWAY_REST_API_NAME}"
+        echo "APIGATEWAY_REST_API_ID: ${APIGATEWAY_REST_API_ID}"
+        echo ""
+        sleep 1
+    fi
+
+    while true ; do
+        MENU_ITEM=1
+
+        clear
+        print_menu_header "API Gateway Cluster Stages CloudWatchLogs - ${APIGATEWAY_REST_API_NAME}"
+        
+        echo ""
+        
+        JSON_APIGATEWAY_STAGE_NAMES=(`jq -r ".item[] | .stageName" <<<"$JSON_APIGATEWAY_GET_STAGES"`)
+
+        ### Get the logging level for each stage
+        for JSON_APIGATEWAY_STAGE_NAME in ${JSON_APIGATEWAY_STAGE_NAMES[@]}; do
+            
+            ### Fetch the JSON object for stage
+            LOGGING_LEVEL=`jq -r ".item[] | select (.stageName == \"${JSON_APIGATEWAY_STAGE_NAME}\") | .methodSettings | .[] | .loggingLevel" <<<"${JSON_APIGATEWAY_GET_STAGES}"`
+
+            if [[ "$DEBUG" == "true" ]]; then
+                echo "LOGGING_LEVEL: ${LOGGING_LEVEL}"
+                echo "JSON_APIGATEWAY_GET_STAGES: ${JSON_APIGATEWAY_GET_STAGES}"
+                echo "jq -r \".item[] | select (.stageName == \"${JSON_APIGATEWAY_STAGE_NAME}\") | .methodSettings | .[] | .loggingLevel"
+                sleep 1
+            fi
+            
+            if [ "$LOGGING_LEVEL" == "" ]; then
+                print_compliance_line ${MENU_ITEM} ${JSON_APIGATEWAY_STAGE_NAME} LOGGING_LEVEL fail
+            else
+                print_compliance_line ${MENU_ITEM} ${JSON_APIGATEWAY_STAGE_NAME} LOGGING_LEVEL pass
+            fi
+            MENU_ITEM=`expr $MENU_ITEM + 1`
+        done
+
+        ### Print footer
+        print_menu_footer
+
+        read OPTION
+
+        case $OPTION in
+
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#JSON_APIGATEWAY_STAGE_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else apigateway_cluster_cloudwatch_update ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ${JSON_APIGATEWAY_STAGE_NAMES[$OPTION-1]}; fi ;;
+
+            ''|[Bb]|[Bb]ack) break ;;
+	
+            [Mm]|[Mm]ain) clr ; main_menu ;;
+
+            [EeQq]|[Ee]xit) echo "\n" ; exit ;;
+
+            *)  clr ; wr_err "Invalid option! ==> $OPTION" ;;
+
+        esac
+    done
+}
+
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_detailed_cloudwatchlogs_metrics_menu
+# Purpose:  Used to display the api gateway cluster detailed 
+#           cloudwatchlogs metrics 
+#           menu.
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_detailed_cloudwatchlogs_metrics_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#  Entering: apigateway_cluster_detailed_cloudwatchlogs_metrics_menu function  #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "APIGATEWAY_REST_API_NAME: ${APIGATEWAY_REST_API_NAME}"
+        echo "APIGATEWAY_REST_API_ID: ${APIGATEWAY_REST_API_ID}"
+        echo ""
+        sleep 1
+    fi
+
+    while true ; do
+        MENU_ITEM=1
+
+        clear
+        print_menu_header "API Gateway Cluster Stages CloudWatchLogs Metrics - ${APIGATEWAY_REST_API_NAME}"
+        
+        echo ""
+        
+        JSON_APIGATEWAY_STAGE_NAMES=(`jq -r ".item[] | .stageName" <<<"$JSON_APIGATEWAY_GET_STAGES"`)
+
+        ### Get the logging level for each stage
+        for APIGATEWAY_STAGE_NAME in ${JSON_APIGATEWAY_STAGE_NAMES[@]}; do
+            
+            ### Fetch the JSON object for stage
+            METRICS_ENABLED=`jq -r ".item[] | select (.stageName == \"${APIGATEWAY_STAGE_NAME}\") | .methodSettings | .[] | .metricsEnabled" <<<"${JSON_APIGATEWAY_GET_STAGES}"`
+
+            if [[ "$DEBUG" == "true" ]]; then
+                echo "METRICS_ENABLED: ${METRICS_ENABLED}"
+                echo "APIGATEWAY_STAGE_NAME: ${APIGATEWAY_STAGE_NAME}"
+                echo "jq -r \".item[] | select (.stageName == \"${APIGATEWAY_STAGE_NAME}\") | .methodSettings | .[] | .metricsEnabled"
+                sleep 1
+            fi
+            
+            if [ "$METRICS_ENABLED" != "true" ]; then
+                print_compliance_line ${MENU_ITEM} ${JSON_APIGATEWAY_STAGE_NAME} LOGGING_LEVEL fail
+            else
+                print_compliance_line ${MENU_ITEM} ${JSON_APIGATEWAY_STAGE_NAME} LOGGING_LEVEL pass
+            fi
+            MENU_ITEM=`expr $MENU_ITEM + 1`
+        done
+
+        ### Print footer
+        print_menu_footer
+
+        read OPTION
+
+        case $OPTION in
+
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#JSON_APIGATEWAY_STAGE_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else apigateway_cluster_detailed_cloudwatch_logs_update ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ${JSON_APIGATEWAY_STAGE_NAMES[$OPTION-1]}; fi ;;
+
+            ''|[Bb]|[Bb]ack) break ;;
+	
+            [Mm]|[Mm]ain) clr ; main_menu ;;
+
+            [EeQq]|[Ee]xit) echo "\n" ; exit ;;
+
+            *)  clr ; wr_err "Invalid option! ==> $OPTION" ;;
+
+        esac
+    done
+}
+
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_content_encoding_menu
+# Purpose:  Used to display the api gateway cluster content encoding 
+#           menu.
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_content_encoding_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#         Entering: apigateway_cluster_content_encoding_menu function          #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+    
+    MINIMUM_COMPRESSION_SIZE=`jq -r '.minimumCompressionSize' <<<"$JSON_APIGATEWAY_GET_REST_API"`
+
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "APIGATEWAY_REST_API_NAME: ${APIGATEWAY_REST_API_NAME}"
+        echo "APIGATEWAY_REST_API_ID: ${APIGATEWAY_REST_API_ID}"
+        echo "MINIMUM_COMPRESSION: ${MINIMUM_COMPRESSION}"
+        echo ""
+        sleep 1
+    fi
+
+    while true ; do
+        MENU_ITEM=1
+
+        clear
+        print_menu_header "API Gateway Cluster Content Encoding - ${APIGATEWAY_REST_API_NAME}"
+        
+        echo ""
+
+        if [ "$MINIMUM_COMPRESSION" == "" ]; then
+            print_compliance_line ${MENU_ITEM} "Minimum Compression Size" MINIMUM_COMPRESSION fail
+        else
+            print_compliance_line ${MENU_ITEM} "Minimum Compression Size" MINIMUM_COMPRESSION pass
+        fi
+
+        MENU_ITEM=`expr $MENU_ITEM + 1`
+
+        ### Print footer
+        print_menu_footer
+
+        read OPTION
+
+        case $OPTION in
+
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#JSON_APIGATEWAY_STAGE_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else apigateway_cluster_content_encoding_update ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ${JSON_APIGATEWAY_STAGE_NAMES[$OPTION-1]}; fi ;;
+
+            ''|[Bb]|[Bb]ack) break ;;
+	
+            [Mm]|[Mm]ain) clr ; main_menu ;;
+
+            [EeQq]|[Ee]xit) echo "\n" ; exit ;;
+
+            *)  clr ; wr_err "Invalid option! ==> $OPTION" ;;
+
+        esac
+    done
+}
+
+#----------------------------------------------------------------------
+# Function: apigateway_cluster_private_endpoint_menu
+# Purpose:  Used to display the api gateway cluster private endpoint 
+#           menu.
+# Args:     null
+# Returns:  null 
+#----------------------------------------------------------------------
+function apigateway_cluster_private_endpoint_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#         Entering: apigateway_cluster_private_endpoint_menu function          #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
+    APIGATEWAY_REST_API_NAME=$1
+    APIGATEWAY_REST_API_ID=$2
+
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "APIGATEWAY_REST_API_NAME: ${APIGATEWAY_REST_API_NAME}"
+        echo "APIGATEWAY_REST_API_ID: ${APIGATEWAY_REST_API_ID}"
+        echo ""
+        sleep 1
+    fi
+
+    while true ; do
+        MENU_ITEM=1
+
+        clear
+        print_menu_header "API Gateway Cluster Stages Private Integration - ${APIGATEWAY_REST_API_NAME}"
+        
+        echo ""
+        
+        JSON_APIGATEWAY_STAGE_NAMES=`jq -r ".item[] | .stageName" <<<"$JSON_APIGATEWAY_GET_STAGES"`
+
+        ### Get the content encoding for each stage
+        for JSON_APIGATEWAY_STAGE_NAME in ${JSON_APIGATEWAY_STAGE_NAMES[@]}; do
+            
+            ### Fetch the JSON object for stage
+            ENDPOINT_CONFIGURATION_TYPES=`jq -r ".endpointConfiguration.types" <<<"${JSON_APIGATEWAY_GET_STAGES}"`
+
+            if [[ "$DEBUG" == "true" ]]; then
+                echo "ENDPOINT_CONFIGURATION_TYPES: ${ENDPOINT_CONFIGURATION_TYPES}"
+                echo "JSON_APIGATEWAY_GET_STAGES: ${JSON_APIGATEWAY_GET_STAGES}"
+                echo "jq -r \".endpointConfiguration.types\""
+                sleep 1
+            fi
+            
+            if [ "$ENDPOINT_CONFIGURATION_TYPES" == *"PRIVATE"* ]; then
+                print_compliance_line ${MENU_ITEM} ${JSON_APIGATEWAY_STAGE_NAME} ENDPOINT_CONFIGURATION_TYPES pass
+            else
+                print_compliance_line ${MENU_ITEM} ${JSON_APIGATEWAY_STAGE_NAME} ENDPOINT_CONFIGURATION_TYPES fail
+            fi
+            MENU_ITEM=`expr $MENU_ITEM + 1`
+        done
+
+        ### Print footer
+        print_menu_footer
+
+        read OPTION
+
+        case $OPTION in
+
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#JSON_APIGATEWAY_STAGE_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else apigateway_cluster_private_endpoint_update ${APIGATEWAY_REST_API_NAME} ${APIGATEWAY_REST_API_ID} ${JSON_APIGATEWAY_STAGE_NAMES[$OPTION-1]}; fi ;;
 
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2720,6 +3602,13 @@ function apigateway_cluster_certificate_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function asg_auto_scaling_groups_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#               Entering: asg_auto_scaling_groups_menu function                #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2740,7 +3629,7 @@ function asg_auto_scaling_groups_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#ASG_AUTO_SCALING_GROUP_NAMES[@]} ]; then continue; else asg_auto_scaling_group_menu ${ASG_AUTO_SCALING_GROUP_NAMES[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#ASG_AUTO_SCALING_GROUP_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else asg_auto_scaling_group_menu ${ASG_AUTO_SCALING_GROUP_NAMES[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2766,6 +3655,13 @@ function asg_auto_scaling_groups_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function cloudfront_distributions_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#               Entering: cloudfront_distributions_menu function               #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2786,7 +3682,7 @@ function cloudfront_distributions_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#CLOUDFRONT_DISTRIBUTION_IDS[@]} ]; then continue; else cloudfront_distribution_menu ${CLOUDFRONT_DISTRIBUTION_IDS[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#CLOUDFRONT_DISTRIBUTION_IDS[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else cloudfront_distribution_menu ${CLOUDFRONT_DISTRIBUTION_IDS[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2812,6 +3708,13 @@ function cloudfront_distributions_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function dynamodb_tables_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#                   Entering: dynamodb_tables_menu function                    #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2832,7 +3735,7 @@ function dynamodb_tables_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#DYNAMODB_TABLE_NAMES[@]} ]; then continue; else dynamodb_table_menu ${DYNAMODB_TABLE_NAMES[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#DYNAMODB_TABLE_NAMES[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else dynamodb_table_menu ${DYNAMODB_TABLE_NAMES[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2858,6 +3761,13 @@ function dynamodb_tables_menu {
 # Returns:  null 
 #----------------------------------------------------------------------
 function elasticache_cache_clusters_menu {
+    if [[ "$DEBUG" == "true" ]]; then
+        echo "################################################################################"
+        echo "#             Entering: elasticache_cache_clusters_menu function               #"
+        echo "################################################################################"
+        sleep 1
+    fi
+
     while true ; do
 
         MENU_ITEM=1
@@ -2878,7 +3788,7 @@ function elasticache_cache_clusters_menu {
 
         case $OPTION in
 
-            [1-9]|[1-9][0-9]) if [ $OPTION -gt ${#ELASTICACHE_CACHE_CLUSTER_IDS[@]} ]; then continue; else elasticache_cache_cluster_menu ${ELASTICACHE_CACHE_CLUSTER_IDS[$OPTION-1]}; fi ;;
+            [1-9]|[1-9][0-9]) clr ; if [ $OPTION -gt ${#ELASTICACHE_CACHE_CLUSTER_IDS[@]} ]; then wr_err "Invalid option! ==> $OPTION"; else elasticache_cache_cluster_menu ${ELASTICACHE_CACHE_CLUSTER_IDS[$OPTION-1]}; fi ;;
             
             ''|[Bb]|[Bb]ack) break ;;
 	
@@ -2928,7 +3838,7 @@ function print_menu_header
 
     echo -e "${CYAN}
         OS: ${OS_FULL_NAME} ${OS_VERSION}                         AWS Compliance Script (v${AWS_COMPLIANCE_VERSION})
-                  - ${RESET_FORMATTING}${WHITE}${MENU_TITLE}${RESET_FORMATTING}${CYAN}
+            - ${RESET_FORMATTING}${WHITE}${MENU_TITLE}${RESET_FORMATTING}${CYAN}
         Profile: [${AWS_PROFILE}]    Region: [${AWS_REGION}]    Account: [${STS_ACCOUNT}]
         -------------------------------------------------------------------------------${RESET_FORMATTING}
         "
@@ -3301,6 +4211,10 @@ do
             EMAIL=$1
             shift
             ;;
+        --verbose)
+            shift
+            VERBOSE="true"
+            ;;
         -d|--debug)
             shift
             DEBUG="true"
@@ -3312,10 +4226,17 @@ do
     esac
 done
 
+### Set verbose / non-verbose
+if [ "${VERBOSE}" == "false" ]; then
+    SUFFIX=" > /dev/null 2>&1"
+else
+    SUFFIX=""
+fi
+
 ### Announce DEBUG mode
 if [[ "$DEBUG" == "true" ]]; then
     echo "DEBUG Mode Enabled!!!"
-    sleep 2
+    sleep 1
 fi
 ### Call main function
 main
